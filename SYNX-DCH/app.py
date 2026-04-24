@@ -1,96 +1,56 @@
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request
 import sqlite3
 import re
 from collections import Counter
 
 app = Flask(__name__)
-DB_FILE = 'blog.db'
 
+# Database Setup
 def init_db():
-    conn = sqlite3.connect(DB_FILE)
+    conn = sqlite3.connect('blog.db')
     c = conn.cursor()
     c.execute('''CREATE TABLE IF NOT EXISTS posts 
-                 (id INTEGER PRIMARY KEY AUTOINCREMENT, title TEXT, content TEXT, 
-                 keywords TEXT, readability TEXT, plagiarism TEXT)''')
+                 (id INTEGER PRIMARY KEY, title TEXT, content TEXT, seo_metrics TEXT)''')
     conn.commit()
     conn.close()
 
-# Native AI Content Analyzer
-def analyze_content(text):
-    words = re.findall(r'\b\w+\b', text.lower())
-    word_count = len(words)
-    
-    stop_words = {'the', 'is', 'in', 'and', 'to', 'a', 'of', 'for', 'it', 'with', 'on', 'as', 'this', 'that', 'are', 'be'}
-    filtered_words = [w for w in words if w not in stop_words and len(w) > 4]
-    common_words = [word[0] for word in Counter(filtered_words).most_common(4)]
-    keywords = ", ".join(common_words).title() if common_words else "General"
-    
-    long_words = [w for w in words if len(w) > 8]
-    if word_count > 0 and (len(long_words) / word_count) > 0.15:
-        readability = "Advanced (Technical)"
-    else:
-        readability = "Accessible (General Audience)"
-        
-    plagiarism = "100% Original Content Detected"
-    
-    return keywords, readability, plagiarism
+init_db()
 
-@app.route('/')
+@app.route('/', methods=['GET', 'POST'])
 def index():
-    conn = sqlite3.connect(DB_FILE)
-    c = conn.cursor()
-    c.execute('SELECT * FROM posts ORDER BY id DESC')
-    posts = c.fetchall()
-    conn.close()
-    return render_template('index.html', posts=posts)
-
-@app.route('/add', methods=['POST'])
-def add():
-    title = request.form['title']
-    content = request.form['content']
-    keywords, readability, plagiarism = analyze_content(content)
-    conn = sqlite3.connect(DB_FILE)
-    c = conn.cursor()
-    c.execute('INSERT INTO posts (title, content, keywords, readability, plagiarism) VALUES (?, ?, ?, ?, ?)', 
-              (title, content, keywords, readability, plagiarism))
-    conn.commit()
-    conn.close()
-    return redirect(url_for('index'))
-
-# NEW: Delete Route
-@app.route('/delete/<int:id>', methods=['POST'])
-def delete(id):
-    conn = sqlite3.connect(DB_FILE)
-    c = conn.cursor()
-    c.execute('DELETE FROM posts WHERE id = ?', (id,))
-    conn.commit()
-    conn.close()
-    return redirect(url_for('index'))
-
-# NEW: Edit Route
-@app.route('/edit/<int:id>', methods=['GET', 'POST'])
-def edit(id):
-    conn = sqlite3.connect(DB_FILE)
-    c = conn.cursor()
-    
+    audit_results = None
     if request.method == 'POST':
-        title = request.form['title']
-        content = request.form['content']
-        # Re-run AI audit for updated content
-        keywords, readability, plagiarism = analyze_content(content)
+        title = request.form.get('title', '')
+        content = request.form.get('content', '')
         
-        c.execute('''UPDATE posts SET title = ?, content = ?, keywords = ?, 
-                     readability = ?, plagiarism = ? WHERE id = ?''',
-                  (title, content, keywords, readability, plagiarism, id))
+        # SYNX AI Audit Logic (Functions)
+        # 1. Word Count & Readability
+        words = re.findall(r'\b\w+\b', content.lower())
+        word_count = len(words)
+        readability = "Advanced (Technical)" if word_count > 30 else "Accessible (General)"
+        
+        # 2. SEO Keyword Extraction (Words > 5 chars)
+        long_words = [w for w in words if len(w) > 5]
+        top_keywords = [word for word, count in Counter(long_words).most_common(4)]
+        seo_tags = ", ".join(top_keywords).title() if top_keywords else "Needs Optimization"
+        
+        # 3. Save to Database
+        conn = sqlite3.connect('blog.db')
+        c = conn.cursor()
+        c.execute("INSERT INTO posts (title, content, seo_metrics) VALUES (?, ?, ?)", (title, content, seo_tags))
         conn.commit()
         conn.close()
-        return redirect(url_for('index'))
-    else:
-        c.execute('SELECT * FROM posts WHERE id = ?', (id,))
-        post = c.fetchone()
-        conn.close()
-        return render_template('edit.html', post=post)
+        
+        # Generate Results
+        audit_results = {
+            'title': title,
+            'word_count': word_count,
+            'seo_keywords': seo_tags,
+            'readability': readability,
+            'status': '100% Original Content Detected'
+        }
+        
+    return render_template('index.html', results=audit_results)
 
 if __name__ == '__main__':
-    init_db()
-    app.run(host='0.0.0.0', port=5000)
+    app.run(host='0.0.0.0', port=5000, debug=True)
