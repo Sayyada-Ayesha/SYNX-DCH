@@ -8,7 +8,6 @@ app = Flask(__name__)
 def init_db():
     conn = sqlite3.connect('blog.db')
     c = conn.cursor()
-    # NAYI TABLE: word_count aur readability ke columns add kiye hain
     c.execute('''CREATE TABLE IF NOT EXISTS posts 
                  (id INTEGER PRIMARY KEY, title TEXT, content TEXT, 
                   seo_metrics TEXT, word_count INTEGER, readability TEXT)''')
@@ -30,7 +29,6 @@ def index():
         top_keywords = [word for word, count in Counter(long_words).most_common(4)]
         seo_tags = ", ".join(top_keywords).title() if top_keywords else "Needs Optimization"
         
-        # Database mein sari details save karna
         conn = sqlite3.connect('blog.db')
         c = conn.cursor()
         c.execute("INSERT INTO posts (title, content, seo_metrics, word_count, readability) VALUES (?, ?, ?, ?, ?)", 
