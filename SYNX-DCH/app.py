@@ -8,7 +8,6 @@ DB_FILE = 'blog.db'
 def init_db():
     conn = sqlite3.connect(DB_FILE)
     c = conn.cursor()
-    # Table schema with all metrics
     c.execute('''CREATE TABLE IF NOT EXISTS posts 
                  (id INTEGER PRIMARY KEY AUTOINCREMENT, 
                   title TEXT, content TEXT, seo_metrics TEXT, 
@@ -18,7 +17,7 @@ def init_db():
     conn.close()
 
 def process_youtube(content):
-    # YouTube Link ko Video Player mein badalne ka logic
+    # Asli "Preview" Logic: YouTube link ko player mein badalna
     yt_pattern = r'(https?://(?:www\.)?(?:youtube\.com/watch\?v=|youtu\.be/|youtube\.com/embed/)([a-zA-Z0-9_-]{11})[^\s]*)'
     iframe = r'''<div class="mt-3 mb-3 shadow" style="position:relative;padding-top:56.25%;overflow:hidden;border-radius:12px;">
         <iframe src="https://www.youtube.com/embed/\2" style="position:absolute;top:0;left:0;width:100%;height:100%;border:none;" allowfullscreen></iframe>
@@ -32,10 +31,9 @@ def index():
         title = request.form.get('title', '')
         content = request.form.get('content', '')
         
-        # AI Audit Logic
         words = re.findall(r'\b\w+\b', re.sub('<[^<]+?>', '', content).lower())
         word_count = len(words)
-        readability = "Advanced (Technical)" if word_count > 30 else "Accessible"
+        readability = "Advanced" if word_count > 30 else "Accessible"
         top_keywords = [w for w, _ in Counter([w for w in words if len(w)>5]).most_common(4)]
         seo_tags = ", ".join(top_keywords).title() if top_keywords else "N/A"
         
@@ -46,7 +44,6 @@ def index():
         conn.close()
         audit_results = {'title': title, 'word_count': word_count, 'seo_keywords': seo_tags, 'readability': readability}
         
-    # Blogs fetch karna aur YouTube process karna
     conn = sqlite3.connect(DB_FILE)
     conn.row_factory = sqlite3.Row
     rows = conn.execute('SELECT * FROM posts ORDER BY created_at DESC').fetchall()
@@ -56,7 +53,6 @@ def index():
         p['display_content'] = process_youtube(p['content'])
         all_posts.append(p)
     conn.close()
-    
     return render_template('index.html', results=audit_results, posts=all_posts)
 
 if __name__ == '__main__':
