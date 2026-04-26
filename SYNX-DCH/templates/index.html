@@ -1,124 +1,96 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SYNX AI — Content Hub</title>
-  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <style>
-    :root {
-      --bg: #0a0a0f; --surface: #111118; --card: #16161f;
-      --border: #1e1e2e; --accent: #7c6ff7; --accent2: #e84f7a;
-      --accent3: #35d8b0; --text: #e8e8f0; --muted: #6b6b80;
-    }
-    body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; min-height: 100vh; }
-    .sidebar { position: fixed; width: 240px; height: 100vh; background: var(--surface); border-right: 1px solid var(--border); padding: 30px 0; }
-    .nav-item { padding: 12px 25px; color: var(--muted); cursor: pointer; text-decoration: none; display: block; font-size: 0.9rem; transition: 0.3s; border-left: 3px solid transparent; }
-    .nav-item:hover, .nav-item.active { background: rgba(124,111,247,0.1); color: var(--text); border-left-color: var(--accent); }
-    .main { margin-left: 240px; padding: 40px; }
-    .workspace-card { background: var(--card); border: 1px solid var(--border); border-radius: 15px; padding: 30px; margin-bottom: 30px; }
-    .btn-synx { background: linear-gradient(135deg, var(--accent), #9b6af5); border: none; padding: 12px; border-radius: 10px; color: white; width: 100%; font-weight: 700; }
-    .tab-pane { display: none; animation: fadeIn 0.4s; }
-    .tab-pane.active { display: block; }
-    .badge-synx { font-size: 0.7rem; padding: 4px 10px; border-radius: 5px; margin-right: 5px; }
-    .yt-embed-wrapper { position: relative; padding-top: 56.25%; margin-top: 15px; border-radius: 10px; overflow: hidden; }
-    .yt-embed-wrapper iframe { position: absolute; top: 0; width: 100%; height: 100%; }
-    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-  </style>
+    <meta charset="UTF-8">
+    <title>SYNX AI - Premium Content Hub</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.ckeditor.com/ckeditor5/39.0.1/classic/ckeditor.js"></script>
+    <style>
+        :root { --bg: #0f172a; --card: #1e293b; --accent: #38bdf8; --text: #f8fafc; }
+        body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; }
+        .sidebar { position: fixed; width: 240px; height: 100vh; background: #020617; padding: 30px 20px; border-right: 1px solid #334155; }
+        .main { margin-left: 240px; padding: 40px; }
+        .nav-link { color: #94a3b8; padding: 12px; border-radius: 8px; cursor: pointer; transition: 0.3s; margin-bottom: 5px; }
+        .nav-link:hover, .nav-link.active { background: #1e293b; color: var(--accent); }
+        .workspace-card { background: var(--card); border-radius: 12px; padding: 25px; border: 1px solid #334155; }
+        .ck-editor__editable { min-height: 300px; color: #000; }
+        .tab-pane { display: none; } .tab-pane.active { display: block; animation: fadeIn 0.5s; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    </style>
 </head>
 <body>
 
-<aside class="sidebar">
-  <div class="px-4 mb-5">
-    <h4 style="color: var(--accent); font-weight: 800; letter-spacing: 2px;">SYNX AI</h4>
-    <small style="color: var(--muted);">HORIZON PLATFORM</small>
-  </div>
-  <nav>
-    <div class="nav-item active" id="editor-nav" onclick="switchTab('editor', this)">📝 Content Editor</div>
-    <div class="nav-item" id="audit-nav" onclick="switchTab('audit', this)">📊 AI Audit Report</div>
-    <div class="nav-item" id="blogs-nav" onclick="switchTab('blogs', this)">🗂️ My Blogs</div>
-  </nav>
-</aside>
+<div class="sidebar">
+    <h4 class="fw-bold mb-5" style="color: var(--accent);">SYNX AI <br><small class="text-muted" style="font-size: 12px;">HORIZON</small></h4>
+    <div class="nav-link active" onclick="switchTab('editor', this)">📝 Content Editor</div>
+    <div class="nav-link" onclick="switchTab('blogs', this)">🗂️ My Blogs</div>
+    {% if results %}<div class="nav-link" id="audit-btn" onclick="switchTab('audit', this)">📊 AI Audit</div>{% endif %}
+</div>
 
-<main class="main">
-  <div id="editor-tab" class="tab-pane active">
-    <h2 class="mb-4">Content <span>Architecture</span> Engine</h2>
-    <div class="workspace-card">
-      <form action="/" method="POST">
-        <input type="text" name="title" class="form-control bg-dark text-white border-secondary mb-3" placeholder="Enter high-impact title..." required>
-        <textarea name="content" class="form-control bg-dark text-white border-secondary mb-3" rows="8" placeholder="Write or paste links here..." required></textarea>
-        <button type="submit" class="btn-synx">⚡ Run AI Analysis & Publish</button>
-      </form>
-    </div>
-  </div>
-
-  <div id="audit-tab" class="tab-pane">
-    <h2 class="mb-4">AI Audit Results</h2>
-    <input type="hidden" id="has-results" value="{% if results %}true{% else %}false{% endif %}">
-    {% if results %}
-    <div class="workspace-card border-success">
-      <h4>Report for: "{{ results.title }}"</h4>
-      <div class="my-3">
-        <span class="badge-synx bg-success">✅ Status: {{ results.status }}</span>
-        <span class="badge-synx bg-primary">📝 Words: {{ results.word_count }}</span>
-        <span class="badge-synx bg-info text-dark">🧠 Readability: {{ results.readability }}</span>
-      </div>
-      <p class="text-muted mt-3">SEO Keywords Found: <br><b class="text-white">{{ results.seo_keywords }}</b></p>
-    </div>
-    {% else %}
-    <div class="alert alert-secondary bg-dark text-muted border-secondary">No recent audit. Publish an article first.</div>
-    {% endif %}
-  </div>
-
-  <div id="blogs-tab" class="tab-pane">
-    <h2 class="mb-4">Published Content Library</h2>
-    <div class="row">
-      {% for post in posts %}
-      <div class="col-md-6 mb-4">
-        <div class="workspace-card h-100">
-          <h5>{{ post.title }}</h5>
-          <div class="mb-3 mt-2">
-            <span class="badge-synx bg-secondary">{{ post.readability }}</span>
-            <span class="badge-synx bg-dark border border-secondary">{{ post.seo_keywords }}</span>
-          </div>
-          <button class="btn btn-sm btn-outline-light w-100" data-bs-toggle="modal" data-bs-target="#modal{{ post.id }}">Read Full Post</button>
+<div class="main">
+    <div id="editor-tab" class="tab-pane active">
+        <h2 class="mb-4 fw-bold">Content Architecture Engine</h2>
+        <div class="workspace-card">
+            <form action="/" method="POST">
+                <label class="small fw-bold text-muted mb-2">ARTICLE TITLE</label>
+                <input type="text" name="title" class="form-control mb-4 bg-dark text-white border-secondary" placeholder="Enter high-impact title..." required>
+                <label class="small fw-bold text-muted mb-2">CONTENT BODY</label>
+                <textarea id="editor" name="content"></textarea>
+                <button type="submit" class="btn btn-primary w-100 mt-4 fw-bold">🚀 Run AI Analysis & Publish</button>
+            </form>
         </div>
-      </div>
-
-      <div class="modal fade" id="modal{{ post.id }}" tabindex="-1">
-        <div class="modal-dialog modal-lg">
-          <div class="modal-content bg-dark text-white border-secondary">
-            <div class="modal-header border-secondary">
-              <h5>{{ post.title }}</h5>
-              <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-              <p class="text-muted small">Published: {{ post.created_at }}</p>
-              <div class="mb-4">{{ post.display_content | safe }}</div>
-            </div>
-          </div>
-        </div>
-      </div>
-      {% endfor %}
     </div>
-  </div>
-</main>
+
+    <div id="audit-tab" class="tab-pane">
+        <h2 class="mb-4 fw-bold">AI Audit Report</h2>
+        {% if results %}
+        <div class="workspace-card border-info">
+            <h4 class="text-accent">{{ results.title }}</h4>
+            <div class="d-flex gap-3 my-3">
+                <span class="badge bg-primary">Words: {{ results.count }}</span>
+                <span class="badge bg-success">Readability: {{ results.readability }}</span>
+            </div>
+            <p class="text-muted">SEO Keywords: <strong class="text-white">{{ results.keywords }}</strong></p>
+        </div>
+        {% endif %}
+    </div>
+
+    <div id="blogs-tab" class="tab-pane">
+        <h2 class="mb-4 fw-bold">Published Library</h2>
+        <div class="row">
+            {% for post in posts %}
+            <div class="col-md-6 mb-4">
+                <div class="workspace-card">
+                    <h5>{{ post.title }}</h5>
+                    <p class="text-muted small">Keywords: {{ post.seo_keywords }}</p>
+                    <button class="btn btn-sm btn-outline-info w-100 mt-2" data-bs-toggle="modal" data-bs-target="#m{{post.id}}">View Full Blog</button>
+                </div>
+            </div>
+            <div class="modal fade" id="m{{post.id}}" tabindex="-1">
+                <div class="modal-dialog modal-lg"><div class="modal-content bg-dark text-white">
+                    <div class="modal-header border-secondary"><h5>{{ post.title }}</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div>
+                    <div class="modal-body">{{ post.content | safe }}</div>
+                </div></div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-  function switchTab(tabId, element) {
-    document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-    document.querySelectorAll('.tab-pane').forEach(el => el.classList.remove('active'));
-    element.classList.add('active');
-    document.getElementById(tabId + '-tab').classList.add('active');
-  }
-
-  document.addEventListener("DOMContentLoaded", function() {
-    if (document.getElementById('has-results').value === 'true') {
-      switchTab('audit', document.getElementById('audit-nav'));
+    ClassicEditor.create(document.querySelector('#editor')).catch(e => console.error(e));
+    
+    function switchTab(tabId, el) {
+        document.querySelectorAll('.nav-link').forEach(n => n.classList.remove('active'));
+        document.querySelectorAll('.tab-pane').forEach(t => t.classList.remove('active'));
+        el.classList.add('active');
+        document.getElementById(tabId + '-tab').classList.add('active');
     }
-  });
+
+    {% if results %}
+        window.onload = () => document.getElementById('audit-btn').click();
+    {% endif %}
 </script>
 </body>
 </html>
