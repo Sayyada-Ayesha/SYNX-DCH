@@ -7,16 +7,18 @@
     <script src="https://cdn.ckeditor.com/ckeditor5/39.0.1/classic/ckeditor.js"></script>
     <style>
         body { background-color: #f4f7f6; font-family: 'Segoe UI', sans-serif; }
-        .sidebar { background: #0f172a; color: white; min-height: 100vh; padding-top: 20px; position: fixed; width: 250px; }
-        .main-content { margin-left: 250px; padding: 40px; }
+        .sidebar { background: #0f172a; color: white; min-height: 100vh; padding-top: 20px; position: fixed; width: 220px; }
+        .main-content { margin-left: 220px; padding: 40px; }
         .brand-text { font-size: 1.5rem; font-weight: 800; color: #38bdf8; text-align: center; margin-bottom: 30px; }
         .nav-link { color: #cbd5e1; cursor: pointer; padding: 12px 20px; border-radius: 8px; margin-bottom: 10px; transition: 0.3s; }
         .nav-link:hover, .nav-link.active { background: #1e293b; color: white; border-left: 4px solid #38bdf8; }
-        .workspace-card { background: white; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); padding: 30px; }
+        .workspace-card { background: white; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); padding: 30px; margin-bottom: 30px; }
         .ck-editor__editable { min-height: 300px; color: black; }
         .tab-pane { display: none; }
         .tab-pane.active { display: block; animation: fadeIn 0.5s; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        /* Link styling taake wo blue aur clickable nazar ayein */
+        .blog-content a { color: #0284c7; text-decoration: underline; font-weight: 600; }
     </style>
 </head>
 <body>
@@ -34,15 +36,9 @@
             <h3 class="fw-bold text-dark mb-4">Content Architecture Engine</h3>
             <div class="workspace-card">
                 <form action="/" method="POST">
-                    <div class="mb-3">
-                        <label class="fw-bold text-secondary mb-2">ARTICLE TITLE</label>
-                        <input type="text" class="form-control form-control-lg" name="title" placeholder="Enter title..." required>
-                    </div>
-                    <div class="mb-4">
-                        <label class="fw-bold text-secondary mb-2">CONTENT BODY</label>
-                        <textarea id="content-editor" name="content"></textarea>
-                    </div>
-                    <button type="submit" class="btn btn-primary w-100 fw-bold py-3">🚀 Run AI Analysis & Publish</button>
+                    <input type="text" class="form-control form-control-lg mb-3" name="title" placeholder="Article Title..." required>
+                    <textarea id="content-editor" name="content"></textarea>
+                    <button type="submit" class="btn btn-primary w-100 mt-4 py-3 fw-bold">🚀 Run AI Analysis & Publish</button>
                 </form>
             </div>
         </div>
@@ -51,38 +47,25 @@
             <h3 class="fw-bold text-dark mb-4">AI Audit Results</h3>
             {% if results %}
             <div class="workspace-card border-start border-info border-5">
-                <h5 class="fw-bold">Report for: "{{ results.title }}"</h5>
-                <div class="mt-3">
-                    <span class="badge bg-success p-2 me-2">Status: {{ results.status }}</span>
-                    <span class="badge bg-primary p-2 me-2">Words: {{ results.word_count }}</span>
-                    <span class="badge bg-warning text-dark p-2">Readability: {{ results.readability }}</span>
-                </div>
-                <div class="mt-4">
-                    <p class="text-secondary fw-bold mb-1">SEO Keywords:</p>
-                    <p class="fs-5 fw-bold">{{ results.seo_keywords }}</p>
-                </div>
+                <h5>Report for: "{{ results.title }}"</h5>
+                <p class="mt-3">Status: <span class="badge bg-success">{{ results.status }}</span></p>
+                <p>Keywords: <b>{{ results.seo_keywords }}</b></p>
             </div>
-            {% else %}
-            <div class="alert alert-light border shadow-sm">No recent audit. Publish an article first.</div>
             {% endif %}
         </div>
 
         <div id="blogs-tab" class="tab-pane">
             <h3 class="fw-bold text-dark mb-4">Published Library</h3>
-            <div class="row">
-                {% for post in blogs %}
-                <div class="col-md-6 mb-4">
-                    <div class="workspace-card h-100">
-                        <h5 class="fw-bold">{{ post.title }}</h5>
-                        <p class="text-muted small">SEO Tags: {{ post.seo_metrics }}</p>
-                        <hr>
-                        <div class="blog-preview text-secondary" style="font-size: 0.9rem;">
-                            {{ post.content | safe }}
-                        </div>
-                    </div>
+            {% for blog in blogs %}
+            <div class="workspace-card blog-content">
+                <h4 class="fw-bold">{{ blog.title }}</h4>
+                <p class="text-muted small">SEO: {{ blog.seo_metrics }}</p>
+                <hr>
+                <div class="mt-3">
+                    {{ blog.content | safe }}
                 </div>
-                {% endfor %}
             </div>
+            {% endfor %}
         </div>
     </div>
 
@@ -97,8 +80,7 @@
         }
 
         document.addEventListener("DOMContentLoaded", function() {
-            const hasResults = "{% if results %}true{% else %}false{% endif %}";
-            if (hasResults === "true") {
+            if ("{% if results %}true{% else %}false{% endif %}" === "true") {
                 switchTab('audit', document.getElementById('audit-nav'));
             }
         });
