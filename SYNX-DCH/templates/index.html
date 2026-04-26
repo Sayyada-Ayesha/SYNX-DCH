@@ -4,517 +4,121 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>SYNX AI — Content Hub</title>
-  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <style>
     :root {
-      --bg: #0a0a0f;
-      --surface: #111118;
-      --card: #16161f;
-      --border: #1e1e2e;
-      --accent: #7c6ff7;
-      --accent2: #e84f7a;
-      --accent3: #35d8b0;
-      --text: #e8e8f0;
-      --muted: #6b6b80;
-      --highlight: rgba(124,111,247,0.12);
+      --bg: #0a0a0f; --surface: #111118; --card: #16161f;
+      --border: #1e1e2e; --accent: #7c6ff7; --accent2: #e84f7a;
+      --accent3: #35d8b0; --text: #e8e8f0; --muted: #6b6b80;
     }
-
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-
-    body {
-      background: var(--bg);
-      color: var(--text);
-      font-family: 'DM Sans', sans-serif;
-      min-height: 100vh;
-      overflow-x: hidden;
-    }
-
-    /* Ambient background glow */
-    body::before {
-      content: '';
-      position: fixed;
-      top: -200px; left: -200px;
-      width: 600px; height: 600px;
-      background: radial-gradient(circle, rgba(124,111,247,0.08) 0%, transparent 70%);
-      pointer-events: none; z-index: 0;
-    }
-    body::after {
-      content: '';
-      position: fixed;
-      bottom: -200px; right: -200px;
-      width: 500px; height: 500px;
-      background: radial-gradient(circle, rgba(232,79,122,0.06) 0%, transparent 70%);
-      pointer-events: none; z-index: 0;
-    }
-
-    /* SIDEBAR */
-    .sidebar {
-      position: fixed; top: 0; left: 0;
-      width: 220px; height: 100vh;
-      background: var(--surface);
-      border-right: 1px solid var(--border);
-      display: flex; flex-direction: column;
-      padding: 28px 0;
-      z-index: 100;
-    }
-
-    .brand {
-      padding: 0 24px 28px;
-      border-bottom: 1px solid var(--border);
-    }
-    .brand-name {
-      font-family: 'Syne', sans-serif;
-      font-size: 1.35rem;
-      font-weight: 800;
-      letter-spacing: 0.08em;
-      color: var(--accent);
-    }
-    .brand-sub {
-      font-size: 0.65rem;
-      letter-spacing: 0.2em;
-      color: var(--muted);
-      text-transform: uppercase;
-      margin-top: 3px;
-    }
-
-    .nav { padding: 20px 0; flex: 1; }
-    .nav-item {
-      display: flex; align-items: center; gap: 10px;
-      padding: 11px 24px;
-      font-size: 0.82rem;
-      font-weight: 500;
-      color: var(--muted);
-      cursor: pointer;
-      transition: all 0.2s;
-      border-left: 3px solid transparent;
-      text-decoration: none;
-    }
-    .nav-item:hover, .nav-item.active {
-      color: var(--text);
-      background: var(--highlight);
-      border-left-color: var(--accent);
-    }
-    .nav-icon { font-size: 0.9rem; width: 18px; text-align: center; }
-
-    .sidebar-footer {
-      padding: 16px 24px;
-      border-top: 1px solid var(--border);
-      font-size: 0.7rem;
-      color: var(--muted);
-    }
-    .status-dot {
-      display: inline-block; width: 7px; height: 7px;
-      border-radius: 50%; background: var(--accent3);
-      margin-right: 6px; animation: pulse 2s infinite;
-    }
-    @keyframes pulse {
-      0%,100% { opacity: 1; } 50% { opacity: 0.4; }
-    }
-
-    /* MAIN */
-    .main {
-      margin-left: 220px;
-      min-height: 100vh;
-      position: relative; z-index: 1;
-    }
-
-    /* HEADER */
-    .header {
-      padding: 32px 48px 24px;
-      border-bottom: 1px solid var(--border);
-      background: rgba(10,10,15,0.8);
-      backdrop-filter: blur(12px);
-      position: sticky; top: 0; z-index: 50;
-    }
-    .header-top {
-      display: flex; justify-content: space-between; align-items: flex-start;
-    }
-    .page-title {
-      font-family: 'Syne', sans-serif;
-      font-size: 1.6rem;
-      font-weight: 700;
-      color: var(--text);
-    }
-    .page-title span { color: var(--accent); }
-    .header-badge {
-      background: var(--highlight);
-      border: 1px solid rgba(124,111,247,0.3);
-      color: var(--accent);
-      font-size: 0.7rem;
-      padding: 5px 12px;
-      border-radius: 20px;
-      letter-spacing: 0.05em;
-      font-weight: 600;
-    }
-
-    /* CONTENT EDITOR */
-    .content-area { padding: 36px 48px; }
-
-    .editor-card {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      overflow: hidden;
-      margin-bottom: 40px;
-    }
-    .editor-header {
-      padding: 18px 24px;
-      border-bottom: 1px solid var(--border);
-      display: flex; align-items: center; gap: 10px;
-    }
-    .editor-dot { width: 9px; height: 9px; border-radius: 50%; }
-    .editor-header-title {
-      font-family: 'Syne', sans-serif;
-      font-size: 0.78rem;
-      font-weight: 700;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: var(--muted);
-      margin-left: 6px;
-    }
-
-    .editor-body { padding: 28px; }
-
-    .field-label {
-      font-size: 0.68rem;
-      font-weight: 600;
-      letter-spacing: 0.15em;
-      text-transform: uppercase;
-      color: var(--muted);
-      margin-bottom: 8px;
-      display: block;
-    }
-
-    .input-title {
-      width: 100%;
-      background: rgba(255,255,255,0.03);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      color: var(--text);
-      font-family: 'Syne', sans-serif;
-      font-size: 1rem;
-      font-weight: 600;
-      padding: 14px 18px;
-      outline: none;
-      transition: border-color 0.2s, box-shadow 0.2s;
-      margin-bottom: 22px;
-    }
-    .input-title:focus {
-      border-color: var(--accent);
-      box-shadow: 0 0 0 3px rgba(124,111,247,0.12);
-    }
-    .input-title::placeholder { color: var(--muted); font-weight: 400; font-family: 'DM Sans', sans-serif; }
-
-    .textarea-content {
-      width: 100%;
-      background: rgba(255,255,255,0.03);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      color: var(--text);
-      font-family: 'DM Sans', sans-serif;
-      font-size: 0.9rem;
-      line-height: 1.7;
-      padding: 16px 18px;
-      outline: none;
-      resize: vertical;
-      min-height: 160px;
-      transition: border-color 0.2s, box-shadow 0.2s;
-      margin-bottom: 8px;
-    }
-    .textarea-content:focus {
-      border-color: var(--accent);
-      box-shadow: 0 0 0 3px rgba(124,111,247,0.12);
-    }
-    .textarea-content::placeholder { color: var(--muted); }
-
-    .textarea-hint {
-      font-size: 0.72rem;
-      color: var(--muted);
-      margin-bottom: 22px;
-    }
-    .textarea-hint span { color: var(--accent3); }
-
-    .btn-publish {
-      width: 100%;
-      background: linear-gradient(135deg, var(--accent) 0%, #9b6af5 100%);
-      color: #fff;
-      font-family: 'Syne', sans-serif;
-      font-size: 0.88rem;
-      font-weight: 700;
-      letter-spacing: 0.08em;
-      padding: 15px;
-      border: none;
-      border-radius: 10px;
-      cursor: pointer;
-      transition: opacity 0.2s, transform 0.15s;
-    }
-    .btn-publish:hover { opacity: 0.9; transform: translateY(-1px); }
-    .btn-publish:active { transform: translateY(0); }
-
-    /* POSTS SECTION */
-    .section-header {
-      display: flex; align-items: center; gap: 12px;
-      margin-bottom: 22px;
-    }
-    .section-title {
-      font-family: 'Syne', sans-serif;
-      font-size: 1rem;
-      font-weight: 700;
-      color: var(--text);
-    }
-    .section-count {
-      background: var(--highlight);
-      color: var(--accent);
-      font-size: 0.7rem;
-      font-weight: 700;
-      padding: 3px 10px;
-      border-radius: 20px;
-      border: 1px solid rgba(124,111,247,0.25);
-    }
-    .section-line {
-      flex: 1;
-      height: 1px;
-      background: var(--border);
-    }
-
-    /* POST CARD */
-    .post-card {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      margin-bottom: 20px;
-      overflow: hidden;
-      transition: border-color 0.2s, transform 0.2s;
-      animation: fadeUp 0.4s ease both;
-    }
-    .post-card:hover {
-      border-color: rgba(124,111,247,0.35);
-      transform: translateY(-2px);
-    }
-    @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(16px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    .post-header {
-      padding: 20px 24px 14px;
-      display: flex; justify-content: space-between; align-items: flex-start;
-      border-bottom: 1px solid var(--border);
-    }
-    .post-title {
-      font-family: 'Syne', sans-serif;
-      font-size: 1.05rem;
-      font-weight: 700;
-      color: var(--text);
-      line-height: 1.3;
-    }
-    .post-meta {
-      display: flex; align-items: center; gap: 8px;
-      margin-top: 6px;
-    }
-    .meta-tag {
-      font-size: 0.65rem;
-      padding: 3px 8px;
-      border-radius: 4px;
-      font-weight: 600;
-      letter-spacing: 0.04em;
-    }
-    .tag-green { background: rgba(53,216,176,0.12); color: var(--accent3); }
-    .tag-pink  { background: rgba(232,79,122,0.12); color: var(--accent2); }
-    .tag-purple { background: var(--highlight); color: var(--accent); }
-
-    .post-body {
-      padding: 18px 24px;
-      font-size: 0.88rem;
-      line-height: 1.75;
-      color: #b8b8c8;
-    }
-    .post-body a {
-      color: var(--accent);
-      text-decoration: none;
-    }
-    .post-body a:hover { text-decoration: underline; }
-
-    /* YouTube embed */
-    .yt-embed-wrapper {
-      margin: 16px 0;
-      border-radius: 12px;
-      overflow: hidden;
-      border: 1px solid var(--border);
-      position: relative;
-      padding-top: 56.25%;
-      background: #000;
-    }
-    .yt-embed-wrapper iframe {
-      position: absolute;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      border: none;
-    }
-
-    .post-footer {
-      padding: 12px 24px;
-      border-top: 1px solid var(--border);
-      display: flex; justify-content: space-between; align-items: center;
-    }
-    .post-date {
-      font-size: 0.7rem;
-      color: var(--muted);
-    }
-    .btn-delete {
-      background: rgba(232,79,122,0.1);
-      border: 1px solid rgba(232,79,122,0.25);
-      color: var(--accent2);
-      font-size: 0.72rem;
-      font-weight: 600;
-      padding: 5px 12px;
-      border-radius: 6px;
-      cursor: pointer;
-      transition: all 0.2s;
-      font-family: 'DM Sans', sans-serif;
-    }
-    .btn-delete:hover {
-      background: rgba(232,79,122,0.2);
-    }
-
-    /* EMPTY STATE */
-    .empty-state {
-      text-align: center;
-      padding: 56px 24px;
-      border: 1px dashed var(--border);
-      border-radius: 14px;
-    }
-    .empty-icon { font-size: 2.5rem; margin-bottom: 16px; opacity: 0.5; }
-    .empty-title {
-      font-family: 'Syne', sans-serif;
-      font-size: 1rem;
-      font-weight: 700;
-      color: var(--muted);
-      margin-bottom: 8px;
-    }
-    .empty-sub { font-size: 0.82rem; color: var(--muted); opacity: 0.7; }
-
-    /* Scrollbar */
-    ::-webkit-scrollbar { width: 6px; }
-    ::-webkit-scrollbar-track { background: var(--bg); }
-    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
-    ::-webkit-scrollbar-thumb:hover { background: var(--muted); }
-
-    @media (max-width: 768px) {
-      .sidebar { width: 100%; height: auto; position: relative; flex-direction: row; flex-wrap: wrap; }
-      .main { margin-left: 0; }
-      .content-area { padding: 20px; }
-      .header { padding: 20px; }
-    }
+    body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; min-height: 100vh; }
+    .sidebar { position: fixed; width: 240px; height: 100vh; background: var(--surface); border-right: 1px solid var(--border); padding: 30px 0; }
+    .nav-item { padding: 12px 25px; color: var(--muted); cursor: pointer; text-decoration: none; display: block; font-size: 0.9rem; transition: 0.3s; border-left: 3px solid transparent; }
+    .nav-item:hover, .nav-item.active { background: rgba(124,111,247,0.1); color: var(--text); border-left-color: var(--accent); }
+    .main { margin-left: 240px; padding: 40px; }
+    .workspace-card { background: var(--card); border: 1px solid var(--border); border-radius: 15px; padding: 30px; margin-bottom: 30px; }
+    .btn-synx { background: linear-gradient(135deg, var(--accent), #9b6af5); border: none; padding: 12px; border-radius: 10px; color: white; width: 100%; font-weight: 700; }
+    .tab-pane { display: none; animation: fadeIn 0.4s; }
+    .tab-pane.active { display: block; }
+    .badge-synx { font-size: 0.7rem; padding: 4px 10px; border-radius: 5px; margin-right: 5px; }
+    .yt-embed-wrapper { position: relative; padding-top: 56.25%; margin-top: 15px; border-radius: 10px; overflow: hidden; }
+    .yt-embed-wrapper iframe { position: absolute; top: 0; width: 100%; height: 100%; }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
   </style>
 </head>
 <body>
 
 <aside class="sidebar">
-  <div class="brand">
-    <div class="brand-name">SYNX AI</div>
-    <div class="brand-sub">Horizon Platform</div>
+  <div class="px-4 mb-5">
+    <h4 style="color: var(--accent); font-weight: 800; letter-spacing: 2px;">SYNX AI</h4>
+    <small style="color: var(--muted);">HORIZON PLATFORM</small>
   </div>
-  <nav class="nav">
-    <a class="nav-item active" href="/">
-      <span class="nav-icon">✦</span> Content Editor
-    </a>
-    <a class="nav-item" href="/audit_page" onclick="return false;" style="pointer-events:none; opacity:0.4;">
-      <span class="nav-icon">◈</span> AI Audit Report
-    </a>
+  <nav>
+    <div class="nav-item active" id="editor-nav" onclick="switchTab('editor', this)">📝 Content Editor</div>
+    <div class="nav-item" id="audit-nav" onclick="switchTab('audit', this)">📊 AI Audit Report</div>
+    <div class="nav-item" id="blogs-nav" onclick="switchTab('blogs', this)">🗂️ My Blogs</div>
   </nav>
-  <div class="sidebar-footer">
-    <span class="status-dot"></span>System Live
-  </div>
 </aside>
 
 <main class="main">
-  <div class="header">
-    <div class="header-top">
-      <div>
-        <div class="page-title">Content <span>Architecture</span> Engine</div>
-      </div>
-      <div class="header-badge">AI-POWERED ✦</div>
+  <div id="editor-tab" class="tab-pane active">
+    <h2 class="mb-4">Content <span>Architecture</span> Engine</h2>
+    <div class="workspace-card">
+      <form action="/" method="POST">
+        <input type="text" name="title" class="form-control bg-dark text-white border-secondary mb-3" placeholder="Enter high-impact title..." required>
+        <textarea name="content" class="form-control bg-dark text-white border-secondary mb-3" rows="8" placeholder="Write or paste links here..." required></textarea>
+        <button type="submit" class="btn-synx">⚡ Run AI Analysis & Publish</button>
+      </form>
     </div>
   </div>
 
-  <div class="content-area">
-
-    <!-- Editor Card -->
-    <div class="editor-card">
-      <div class="editor-header">
-        <div class="editor-dot" style="background:#e84f7a;"></div>
-        <div class="editor-dot" style="background:#f5a623;"></div>
-        <div class="editor-dot" style="background:#35d8b0;"></div>
-        <span class="editor-header-title">New Article</span>
+  <div id="audit-tab" class="tab-pane">
+    <h2 class="mb-4">AI Audit Results</h2>
+    <input type="hidden" id="has-results" value="{% if results %}true{% else %}false{% endif %}">
+    {% if results %}
+    <div class="workspace-card border-success">
+      <h4>Report for: "{{ results.title }}"</h4>
+      <div class="my-3">
+        <span class="badge-synx bg-success">✅ Status: {{ results.status }}</span>
+        <span class="badge-synx bg-primary">📝 Words: {{ results.word_count }}</span>
+        <span class="badge-synx bg-info text-dark">🧠 Readability: {{ results.readability }}</span>
       </div>
-      <div class="editor-body">
-        <form action="/publish" method="POST">
-          <label class="field-label">Article Title</label>
-          <input class="input-title" type="text" name="title" placeholder="Enter a high-impact title..." required>
-
-          <label class="field-label">Content Body</label>
-          <textarea class="textarea-content" name="content" placeholder="Write your content here... Paste YouTube links and they'll embed automatically!" required></textarea>
-          <div class="textarea-hint">
-            💡 Tip: Paste a <span>YouTube URL</span> directly — it will auto-embed as a video player.
-          </div>
-
-          <button class="btn-publish" type="submit">⚡ Run AI Analysis &amp; Publish</button>
-        </form>
-      </div>
+      <p class="text-muted mt-3">SEO Keywords Found: <br><b class="text-white">{{ results.seo_keywords }}</b></p>
     </div>
+    {% else %}
+    <div class="alert alert-secondary bg-dark text-muted border-secondary">No recent audit. Publish an article first.</div>
+    {% endif %}
+  </div>
 
-    <!-- Published Posts -->
-    <div class="section-header">
-      <span class="section-title">Published &amp; Audited Content</span>
-      <span class="section-count">{{ posts|length }} post{{ 's' if posts|length != 1 else '' }}</span>
-      <div class="section-line"></div>
-    </div>
-
-    {% if posts %}
+  <div id="blogs-tab" class="tab-pane">
+    <h2 class="mb-4">Published Content Library</h2>
+    <div class="row">
       {% for post in posts %}
-      <div class="post-card">
-        <div class="post-header">
-          <div>
-            <div class="post-title">{{ post.title }}</div>
-            <div class="post-meta">
-              {% if post.originality %}
-              <span class="meta-tag tag-green">✓ {{ post.originality }}</span>
-              {% endif %}
-              {% if post.readability %}
-              <span class="meta-tag tag-pink">◎ {{ post.readability }}</span>
-              {% endif %}
-              {% if post.seo_keywords %}
-              <span class="meta-tag tag-purple">⌖ {{ post.seo_keywords }}</span>
-              {% endif %}
+      <div class="col-md-6 mb-4">
+        <div class="workspace-card h-100">
+          <h5>{{ post.title }}</h5>
+          <div class="mb-3 mt-2">
+            <span class="badge-synx bg-secondary">{{ post.readability }}</span>
+            <span class="badge-synx bg-dark border border-secondary">{{ post.seo_keywords }}</span>
+          </div>
+          <button class="btn btn-sm btn-outline-light w-100" data-bs-toggle="modal" data-bs-target="#modal{{ post.id }}">Read Full Post</button>
+        </div>
+      </div>
+
+      <div class="modal fade" id="modal{{ post.id }}" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+          <div class="modal-content bg-dark text-white border-secondary">
+            <div class="modal-header border-secondary">
+              <h5>{{ post.title }}</h5>
+              <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+              <p class="text-muted small">Published: {{ post.created_at }}</p>
+              <div class="mb-4">{{ post.display_content | safe }}</div>
             </div>
           </div>
         </div>
-        <div class="post-body">
-          {{ post.display_content | safe }}
-        </div>
-        <div class="post-footer">
-          <span class="post-date">
-            {% if post.created_at %}
-              {{ post.created_at[:16] if post.created_at|length > 16 else post.created_at }}
-            {% endif %}
-          </span>
-          <form action="/delete/{{ post.id }}" method="POST" style="margin:0;" onsubmit="return confirm('Delete this post?')">
-            <button class="btn-delete" type="submit">× Delete</button>
-          </form>
-        </div>
       </div>
       {% endfor %}
-    {% else %}
-      <div class="empty-state">
-        <div class="empty-icon">◇</div>
-        <div class="empty-title">No content published yet</div>
-        <div class="empty-sub">Write your first article above and hit Publish.</div>
-      </div>
-    {% endif %}
-
+    </div>
   </div>
 </main>
 
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  function switchTab(tabId, element) {
+    document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('.tab-pane').forEach(el => el.classList.remove('active'));
+    element.classList.add('active');
+    document.getElementById(tabId + '-tab').classList.add('active');
+  }
+
+  document.addEventListener("DOMContentLoaded", function() {
+    if (document.getElementById('has-results').value === 'true') {
+      switchTab('audit', document.getElementById('audit-nav'));
+    }
+  });
+</script>
 </body>
 </html>
