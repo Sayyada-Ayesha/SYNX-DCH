@@ -17,13 +17,14 @@ def init_db():
     conn.close()
 
 def process_youtube(content):
-    # Asli "Preview" Logic: YouTube link ko player mein badalna
+    # YouTube Link ko Video Player mein badalne ka logic
     yt_pattern = r'(https?://(?:www\.)?(?:youtube\.com/watch\?v=|youtu\.be/|youtube\.com/embed/)([a-zA-Z0-9_-]{11})[^\s]*)'
     iframe = r'''<div class="mt-3 mb-3 shadow" style="position:relative;padding-top:56.25%;overflow:hidden;border-radius:12px;">
         <iframe src="https://www.youtube.com/embed/\2" style="position:absolute;top:0;left:0;width:100%;height:100%;border:none;" allowfullscreen></iframe>
     </div>'''
-    return re.sub(yt_pattern, iframe, content)
-
+    content = re.sub(yt_pattern, iframe, content)
+    
+    return content
 @app.route('/', methods=['GET', 'POST'])
 def index():
     audit_results = None
@@ -31,9 +32,10 @@ def index():
         title = request.form.get('title', '')
         content = request.form.get('content', '')
         
+        # Simple AI Audit Logic
         words = re.findall(r'\b\w+\b', re.sub('<[^<]+?>', '', content).lower())
         word_count = len(words)
-        readability = "Advanced" if word_count > 30 else "Accessible"
+        readability = "Advanced (Technical)" if word_count > 30 else "Accessible"
         top_keywords = [w for w, _ in Counter([w for w in words if len(w)>5]).most_common(4)]
         seo_tags = ", ".join(top_keywords).title() if top_keywords else "N/A"
         
