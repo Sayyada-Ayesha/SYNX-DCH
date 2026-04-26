@@ -50,7 +50,14 @@ def index():
             'status': '100% Original Content Detected'
         }
         
-    return render_template('index.html', results=audit_results)
+    # NAYA CODE: Database se saari posts uthana taake 'My Blogs' mein show hon
+    conn = sqlite3.connect('blog.db')
+    conn.row_factory = sqlite3.Row
+    c = conn.cursor()
+    all_blogs = c.execute('SELECT * FROM posts ORDER BY id DESC').fetchall()
+    conn.close()
+        
+    return render_template('index.html', results=audit_results, blogs=all_blogs)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
